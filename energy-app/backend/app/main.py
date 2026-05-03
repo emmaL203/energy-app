@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -8,10 +9,11 @@ from app.db import get_db, engine
 from app.models import Base, User, Consumption
 from app.security import verify_password, get_password_hash
 
-app = FastAPI()
-
 from fastapi.middleware.cors import CORSMiddleware
 
+app = FastAPI()
+
+# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,15 +22,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🔧 creează tabelele
-Base.metadata.create_all(bind=engine)
+# 🔥 DEBUG DB CONNECTION
+try:
+    Base.metadata.create_all(bind=engine)
+    print("✅ DB CONNECTED OK")
+except Exception as e:
+    print("❌ DB ERROR:", e)
+    raise e
 
-# 🔐 CONFIG JWT
-import os
-
+# 🔐 ENV VARIABLES
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+if not SECRET_KEY:
+    raise Exception("SECRET_KEY NU este setat!")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -80,7 +88,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     }
 
 
-# 👤 GET CURRENT USER
+# 👤 CURRENT USER
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -95,7 +103,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token invalid")
 
 
-# ➕ ADD CONSUMPTION (electricitate + gaz)
+# ➕ ADD CONSUMPTION
 @app.post("/add-consumption")
 def add_consumption(
     valoare: float,
@@ -123,7 +131,7 @@ def add_consumption(
     return {"message": "Consum adaugat"}
 
 
-# 📊 GET CONSUMPTIONS (doar ale userului)
+# 📊 GET CONSUMPTIONS
 @app.get("/consumptions")
 def get_consumptions(
     db: Session = Depends(get_db),
@@ -139,105 +147,7 @@ def get_consumptions(
     return consum
 
 
-# 👤 TEST AUTH
-@app.get("/me")
-def read_users_me(current_user: str = Depends(get_current_user)):
-    return {"email": current_user}
-
-@app.get("/stats")
-def get_stats(
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    user = db.query(User).filter(User.email == current_user).first()
-
-    consum = db.query(Consumption).filter(Consumption.user_id == user.id).all()
-
-    total = sum(c.valoare for c in consum)
-
-    electricitate = sum(c.valoare for c in consum if c.tip == "electricitate")
-    gaz = sum(c.valoare for c in consum if c.tip == "gaz")
-
-    return {
-        "total_consum": total,
-        "electricitate": electricitate,
-        "gaz": gaz
-    }
-
-@app.get("/consumption-by-date")
-def consumption_by_date(
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    user = db.query(User).filter(User.email == current_user).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    consum = db.query(Consumption).filter(Consumption.user_id == user.id).all()
-
-    result = {}
-
-    for c in consum:
-        data_str = str(c.data)
-
-        if data_str not in result:
-            result[data_str] = 0
-
-        result[data_str] += c.valoare
-
-    return result
-
-
-@app.get("/consumption-by-type")
-def consumption_by_type(
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    user = db.query(User).filter(User.email == current_user).first()
-
-    consum = db.query(Consumption).filter(Consumption.user_id == user.id).all()
-
-    electricitate = sum(c.valoare for c in consum if c.tip == "electricitate")
-    gaz = sum(c.valoare for c in consum if c.tip == "gaz")
-
-    return {
-        "electricitate": electricitate,
-        "gaz": gaz
-    }
-
-@app.get("/alerts")
-def get_alerts(
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    user = db.query(User).filter(User.email == current_user).first()
-
-    consum = db.query(Consumption).filter(Consumption.user_id == user.id).all()
-
-    if len(consum) < 2:
-        return {"message": "Nu sunt suficiente date"}
-
-    last = consum[-1].valoare
-    prev = consum[-2].valoare
-
-    if last > prev * 1.2:
-        return {"alert": "Consum crescut cu peste 20%!"}
-
-    return {"alert": "Consum normal"}
-
-@app.get("/average-consumption")
-def average_consumption(
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    user = db.query(User).filter(User.email == current_user).first()
-
-    consum = db.query(Consumption).filter(Consumption.user_id == user.id).all()
-
-    if not consum:
-        return {"average": 0}
-
-    avg = sum(c.valoare for c in consum) / len(consum)
-
-    return {"average": avg}
+# 🧪 TEST
+@app.get("/")
+def root():
+    return {"message": "API LIVE 🚀"}
