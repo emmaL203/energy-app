@@ -23,12 +23,13 @@ app.add_middleware(
 )
 
 # ✅ creează tabelele (important pentru Neon)
-try:
-    Base.metadata.create_all(bind=engine)
-    print("DB conectat ✔")
-except Exception as e:
-    print("Eroare DB:", e)
-    raise e
+@app.on_event("startup")
+def startup_event():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ DB READY")
+    except Exception as e:
+        print("❌ DB ERROR:", e)
 
 # 🔐 ENV
 SECRET_KEY = os.getenv("SECRET_KEY")
