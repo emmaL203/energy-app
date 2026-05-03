@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# ✅ CORS
+# ✅ CORS (pentru frontend)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,26 +22,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🔥 DEBUG DB CONNECTION
+# ✅ creează tabelele (important pentru Neon)
 try:
     Base.metadata.create_all(bind=engine)
-    print("✅ DB CONNECTED OK")
+    print("DB conectat ✔")
 except Exception as e:
-    print("❌ DB ERROR:", e)
+    print("Eroare DB:", e)
     raise e
 
-# 🔐 ENV VARIABLES
+# 🔐 ENV
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 if not SECRET_KEY:
-    raise Exception("SECRET_KEY NU este setat!")
+    raise Exception("SECRET_KEY nu este setat pe Render!")
+
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-# 🔑 CREATE TOKEN
+# 🔑 TOKEN
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -147,7 +148,7 @@ def get_consumptions(
     return consum
 
 
-# 🧪 TEST
+# 🧪 TEST API
 @app.get("/")
 def root():
     return {"message": "API LIVE 🚀"}

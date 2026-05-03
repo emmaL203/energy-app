@@ -4,10 +4,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-print("DATABASE_URL:", DATABASE_URL)  # 🔥 DEBUG
-
 if not DATABASE_URL:
-    raise Exception("DATABASE_URL NU este setat!")
+    raise Exception("DATABASE_URL nu este setat pe Render!")
 
 engine = create_engine(
     DATABASE_URL,
@@ -21,6 +19,7 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
