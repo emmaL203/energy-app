@@ -24,7 +24,9 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 # 🔐 CONFIG JWT
-SECRET_KEY = "secret123"
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
