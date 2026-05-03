@@ -10,6 +10,13 @@ from app.models import Base, User, Consumption
 from app.security import verify_password, get_password_hash
 
 from fastapi.middleware.cors import CORSMiddleware
+import traceback
+
+try:
+    print("🚀 STARTING APP...")
+except Exception as e:
+    print("❌ START ERROR:", e)
+    traceback.print_exc()
 
 app = FastAPI()
 
@@ -35,7 +42,8 @@ def startup_event():
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
-    raise Exception("SECRET_KEY nu este setat pe Render!")
+    print("⚠️ SECRET_KEY lipseste - folosesc fallback")
+    SECRET_KEY = "fallback_secret"
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

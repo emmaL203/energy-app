@@ -5,8 +5,9 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
-    raise Exception("DATABASE_URL nu este setat pe Render!")
-
+    print("⚠️ DATABASE_URL lipseste - folosesc SQLite")
+    DATABASE_URL = "sqlite:///./test.db"
+    
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True
