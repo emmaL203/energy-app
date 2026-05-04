@@ -2,14 +2,12 @@ import React, { useState } from "react";
 
 const API = "https://energy-app-8yvb.onrender.com";
 
-export default function Login({ onLogin }) {
+function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    setLoading(true);
     setError("");
 
     try {
@@ -27,16 +25,16 @@ export default function Login({ onLogin }) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.detail || "Login failed");
+        setError(data.detail || "Eroare la login");
+        return;
       }
 
       localStorage.setItem("token", data.access_token);
       onLogin();
-    } catch (err) {
-      setError(err.message);
-    }
 
-    setLoading(false);
+    } catch (err) {
+      setError("Serverul nu raspunde");
+    }
   };
 
   return (
@@ -44,30 +42,26 @@ export default function Login({ onLogin }) {
       <div className="card">
         <h2>Login</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
         <input
-          type="password"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
           placeholder="Password"
-          value={password}
+          type="password"
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        <button onClick={handleLogin} disabled={loading}>
-          {loading ? "Se încarcă..." : "Login"}
-        </button>
+        <button onClick={handleLogin}>Login</button>
 
         <p>
-          Nu ai cont? <a href="/register">Creează cont</a>
+          Nu ai cont? <a href="/register">Creeaza cont</a>
         </p>
       </div>
     </div>
   );
 }
+
+export default Login;

@@ -2,38 +2,31 @@ import React, { useState } from "react";
 
 const API = "https://energy-app-8yvb.onrender.com";
 
-export default function Register() {
+function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [msg, setMsg] = useState("");
 
   const handleRegister = async () => {
-    setLoading(true);
-    setError("");
-    setMessage("");
+    setMsg("");
 
     try {
-      const res = await fetch(
-        `${API}/register?email=${email}&password=${password}`,
-        {
-          method: "POST",
-        }
-      );
+      const res = await fetch(`${API}/register?email=${email}&password=${password}`, {
+        method: "POST",
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.detail || "Register failed");
+        setMsg(data.detail);
+        return;
       }
 
-      setMessage("Cont creat cu succes!");
-    } catch (err) {
-      setError(err.message);
-    }
+      setMsg("Cont creat! Mergi la login.");
 
-    setLoading(false);
+    } catch {
+      setMsg("Eroare server");
+    }
   };
 
   return (
@@ -41,31 +34,19 @@ export default function Register() {
       <div className="card">
         <h2>Register</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {msg && <p>{msg}</p>}
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {message && <p style={{ color: "green" }}>{message}</p>}
-
-        <button onClick={handleRegister} disabled={loading}>
-          {loading ? "Se creează..." : "Register"}
-        </button>
+        <button onClick={handleRegister}>Register</button>
 
         <p>
-          Ai deja cont? <a href="/">Login</a>
+          Ai cont? <a href="/login">Login</a>
         </p>
       </div>
     </div>
   );
 }
+
+export default Register;

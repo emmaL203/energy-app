@@ -16,16 +16,13 @@ function Dashboard() {
 
         const result = await res.json();
 
-        // 🔥 FIX IMPORTANT
         if (Array.isArray(result)) {
           setData(result);
         } else {
-          console.error("Nu e array:", result);
-          setData([]); // fallback
+          setData([]);
         }
 
-      } catch (err) {
-        console.error(err);
+      } catch {
         setData([]);
       }
     };
@@ -35,14 +32,14 @@ function Dashboard() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Consumuri</h2>
+      <h2>Dashboard</h2>
 
       {data.length === 0 ? (
-        <p>Nu ai consumuri încă</p>
+        <p>Nu ai consumuri</p>
       ) : (
-        data.map((item) => (
-          <div key={item.id}>
-            {item.tip} - {item.valoare}
+        data.map((c) => (
+          <div key={c.id}>
+            {c.tip} - {c.valoare}
           </div>
         ))
       )}

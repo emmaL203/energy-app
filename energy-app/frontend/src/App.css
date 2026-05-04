@@ -1,14 +1,14 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #6a85f1, #9c6ef3);
+  font-family: Arial;
+  background: linear-gradient(to right, #6a5acd, #8a2be2);
 }
 
 .container {
   display: flex;
+  height: 100vh;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
 .card {
@@ -16,27 +16,18 @@ body {
   padding: 30px;
   border-radius: 10px;
   width: 300px;
-  text-align: center;
 }
 
 input {
   width: 100%;
-  padding: 10px;
   margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 10px;
 }
 
 button {
   width: 100%;
   padding: 10px;
-  background: #6a85f1;
+  background: #6a5acd;
   color: white;
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background: gray;
 }
