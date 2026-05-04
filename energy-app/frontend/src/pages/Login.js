@@ -1,42 +1,73 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import API_URL from "../api";
+import React, { useState } from "react";
 
-function Login({ onLogin }) {
+const API = "https://energy-app-8yvb.onrender.com";
+
+export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    const res = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `username=${email}&password=${password}`,
-    });
+    setLoading(true);
+    setError("");
 
-    const data = await res.json();
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          username: email,
+          password: password,
+        }),
+      });
 
-    localStorage.setItem("token", data.access_token);
-    onLogin();
-    navigate("/");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Login failed");
+      }
+
+      localStorage.setItem("token", data.access_token);
+      onLogin();
+    } catch (err) {
+      setError(err.message);
+    }
+
+    setLoading(false);
   };
 
   return (
     <div className="container">
-      <h2>Login</h2>
+      <div className="card">
+        <h2>Login</h2>
 
-      <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <button onClick={handleLogin}>Login</button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      <p>
-        Nu ai cont? <Link to="/register">Creează cont</Link>
-      </p>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <button onClick={handleLogin} disabled={loading}>
+          {loading ? "Se încarcă..." : "Login"}
+        </button>
+
+        <p>
+          Nu ai cont? <a href="/register">Creează cont</a>
+        </p>
+      </div>
     </div>
   );
 }
-
-export default Login;

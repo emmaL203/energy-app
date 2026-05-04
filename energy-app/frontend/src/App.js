@@ -4,9 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import AddConsumption from "./pages/AddConsumption";
-import Stats from "./pages/Stats";
-import Navbar from "./components/Navbar";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -22,8 +19,6 @@ function App() {
 
   return (
     <Router>
-      {isLoggedIn && <Navbar onLogout={handleLogout} />}
-
       <Routes>
         {!isLoggedIn ? (
           <>
@@ -33,9 +28,7 @@ function App() {
           </>
         ) : (
           <>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/add" element={<AddConsumption />} />
-            <Route path="/stats" element={<Stats />} />
+            <Route path="/" element={<Dashboard onLogout={handleLogout} />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         )}
