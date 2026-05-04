@@ -1,50 +1,47 @@
 import React, { useEffect, useState } from "react";
+import { getConsumptions } from "../api";
 
-const API = "https://energy-app-8yvb.onrender.com";
-
-function Dashboard() {
+export default function Dashboard() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
-        const res = await fetch(`${API}/consumptions`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const token = localStorage.getItem("token");
+        const res = await getConsumptions(token);
 
-        const result = await res.json();
+        console.log("API response:", res);
 
-        if (Array.isArray(result)) {
-          setData(result);
+        // FOARTE IMPORTANT
+        if (Array.isArray(res)) {
+          setData(res);
+        } else if (res.data && Array.isArray(res.data)) {
+          setData(res.data);
         } else {
           setData([]);
         }
-
-      } catch {
+      } catch (err) {
+        console.error(err);
         setData([]);
       }
     };
 
-    fetchData();
+    loadData();
   }, []);
 
   return (
-    <div style={{ padding: 20 }}>
+    <div>
       <h2>Dashboard</h2>
 
       {data.length === 0 ? (
-        <p>Nu ai consumuri</p>
+        <p>Nu ai date</p>
       ) : (
-        data.map((c) => (
-          <div key={c.id}>
-            {c.tip} - {c.valoare}
+        data.map((item, index) => (
+          <div key={index}>
+            {item.tip} - {item.valoare}
           </div>
         ))
       )}
     </div>
   );
 }
-
-export default Dashboard;

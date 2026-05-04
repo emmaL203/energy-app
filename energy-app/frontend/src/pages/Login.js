@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API = "https://energy-app-8yvb.onrender.com";
 
@@ -6,9 +7,13 @@ function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     setError("");
+    setLoading(true);
 
     try {
       const res = await fetch(`${API}/login`, {
@@ -25,16 +30,20 @@ function Login({ onLogin }) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.detail || "Eroare la login");
+        setError(data.detail || "Email sau parola gresita");
+        setLoading(false);
         return;
       }
 
       localStorage.setItem("token", data.access_token);
       onLogin();
+      navigate("/");
 
     } catch (err) {
       setError("Serverul nu raspunde");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -43,6 +52,7 @@ function Login({ onLogin }) {
         <h2>Login</h2>
 
         {error && <p style={{ color: "red" }}>{error}</p>}
+        {loading && <p>Se conecteaza...</p>}
 
         <input
           placeholder="Email"
@@ -54,10 +64,18 @@ function Login({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleLogin}>
+          {loading ? "Se conecteaza..." : "Login"}
+        </button>
 
         <p>
-          Nu ai cont? <a href="/register">Creeaza cont</a>
+          Nu ai cont?{" "}
+          <span
+            style={{ color: "blue", cursor: "pointer" }}
+            onClick={() => navigate("/register")}
+          >
+            Creeaza cont
+          </span>
         </p>
       </div>
     </div>
