@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import { loginUser } from "../api";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://energy-app-8yvb.onrender.com";
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -16,21 +16,10 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          username: email,
-          password: password,
-        }),
-      });
+      const data = await loginUser(email, password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || "Email sau parola gresita");
+      if (!data.access_token) {
+        setError("Email sau parola gresita");
         setLoading(false);
         return;
       }
@@ -38,8 +27,7 @@ function Login({ onLogin }) {
       localStorage.setItem("token", data.access_token);
       onLogin();
       navigate("/");
-
-    } catch (err) {
+    } catch {
       setError("Serverul nu raspunde");
     }
 
@@ -54,15 +42,8 @@ function Login({ onLogin }) {
         {error && <p style={{ color: "red" }}>{error}</p>}
         {loading && <p>Se conecteaza...</p>}
 
-        <input
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          placeholder="Password"
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
 
         <button onClick={handleLogin}>
           {loading ? "Se conecteaza..." : "Login"}

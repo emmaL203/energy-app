@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import { registerUser } from "../api";
 
-const API = "https://energy-app-8yvb.onrender.com";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -11,19 +11,14 @@ function Register() {
     setMsg("");
 
     try {
-      const res = await fetch(`${API}/register?email=${email}&password=${password}`, {
-        method: "POST",
-      });
+      const data = await registerUser(email, password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
+      if (data.detail) {
         setMsg(data.detail);
         return;
       }
 
       setMsg("Cont creat! Mergi la login.");
-
     } catch {
       setMsg("Eroare server");
     }
