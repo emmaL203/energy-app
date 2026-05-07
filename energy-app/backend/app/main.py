@@ -113,6 +113,28 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token invalid")
 
 
+@app.get("/stats")
+def get_stats(
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    user = db.query(User).filter(User.email == current_user).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    consum = db.query(Consumption).filter(Consumption.user_id == user.id).all()
+
+    total = sum(c.valoare for c in consum)
+    electricitate = sum(c.valoare for c in consum if c.tip == "electricitate")
+    gaz = sum(c.valoare for c in consum if c.tip == "gaz")
+
+    return {
+        "total_consum": total,
+        "electricitate": electricitate,
+        "gaz": gaz
+    }
+
 # ➕ ADD CONSUMPTION
 @app.post("/add-consumption")
 def add_consumption(
