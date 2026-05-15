@@ -6,11 +6,20 @@ function AddConsumption() {
   const [tip, setTip] = useState("electricitate");
   const [data, setData] = useState("");
   const [msg, setMsg] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
 
+  // LIMITE CONSUM
   const LIMITA_ELECTRICITATE = 300;
   const LIMITA_GAZ = 150;
 
   const add = async () => {
+    setMsg("");
+
+    if (!valoare || !data) {
+      setMsg("Completează toate câmpurile");
+      return;
+    }
+
     try {
       const res = await fetch(
         `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&data=${data}`,
@@ -31,19 +40,17 @@ function AddConsumption() {
 
       setMsg("Consum adăugat cu succes!");
 
-      // ALERTĂ LIMITĂ
+      // POPUP LIMITĂ
       if (
-        tip === "electricitate" &&
-        Number(valoare) > LIMITA_ELECTRICITATE
+        (tip === "electricitate" &&
+          Number(valoare) > LIMITA_ELECTRICITATE) ||
+        (tip === "gaz" && Number(valoare) > LIMITA_GAZ)
       ) {
-        alert("⚠️ Ai depășit limita recomandată la electricitate!");
-      }
+        setShowPopup(true);
 
-      if (
-        tip === "gaz" &&
-        Number(valoare) > LIMITA_GAZ
-      ) {
-        alert("⚠️ Ai depășit limita recomandată la gaz!");
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 4000);
       }
 
       setValoare("");
@@ -55,62 +62,96 @@ function AddConsumption() {
 
   return (
     <div className="container">
+      {/* POPUP ALERTĂ */}
+      {showPopup && (
+        <div className="popup-warning">
+          ⚠️ Ai depășit limita recomandată de consum la{" "}
+          {tip === "electricitate" ? "electricitate" : "gaz"}!
+        </div>
+      )}
+
       <div className="consumption-card">
-        <h2>Adaugă consum</h2>
+        {/* LEFT SIDE */}
+        <div className="left-panel">
+          <h1>
+            {tip === "electricitate"
+              ? "Consum Electricitate"
+              : "Consum Gaz"}
+          </h1>
 
-        {msg && <p>{msg}</p>}
+          <p>
+            Monitorizează consumul și primește alerte când depășești
+            limitele recomandate.
+          </p>
 
-        {/* SWITCH */}
-        <div className="switch-container">
-          <button
-            className={
-              tip === "electricitate"
-                ? "switch-btn active-electric"
-                : "switch-btn"
-            }
-            onClick={() => setTip("electricitate")}
-          >
-            ⚡ Electricitate
-          </button>
-
-          <button
-            className={
-              tip === "gaz"
-                ? "switch-btn active-gaz"
-                : "switch-btn"
-            }
-            onClick={() => setTip("gaz")}
-          >
-            🔥 Gaz
-          </button>
+          <div className="limit-box">
+            Limită recomandată:
+            <strong>
+              {" "}
+              {tip === "electricitate"
+                ? `${LIMITA_ELECTRICITATE} kWh`
+                : `${LIMITA_GAZ} m³`}
+            </strong>
+          </div>
         </div>
 
-        {/* INPUT VALOARE */}
-        <div className="input-group">
+        {/* RIGHT SIDE */}
+        <div className="right-panel">
+          {/* SWITCH */}
+          <div className="switch-container">
+            <button
+              className={
+                tip === "electricitate"
+                  ? "switch-btn active-electric"
+                  : "switch-btn"
+              }
+              onClick={() => setTip("electricitate")}
+            >
+              ⚡ Electricitate
+            </button>
+
+            <button
+              className={
+                tip === "gaz"
+                  ? "switch-btn active-gaz"
+                  : "switch-btn"
+              }
+              onClick={() => setTip("gaz")}
+            >
+              🔥 Gaz
+            </button>
+          </div>
+
+          {msg && <p className="message">{msg}</p>}
+
+          {/* INPUT VALOARE */}
+          <div className="input-group">
+            <input
+              type="number"
+              placeholder={`Consum în ${
+                tip === "electricitate" ? "kWh" : "m³"
+              }`}
+              value={valoare}
+              onChange={(e) => setValoare(e.target.value)}
+            />
+
+            <span className="unit">
+              {tip === "electricitate" ? "kWh" : "m³"}
+            </span>
+          </div>
+
+          {/* DATĂ */}
           <input
-            type="number"
-            placeholder={`Consum în ${
-              tip === "electricitate" ? "kWh" : "m³"
-            }`}
-            value={valoare}
-            onChange={(e) => setValoare(e.target.value)}
+            type="date"
+            value={data}
+            onChange={(e) => setData(e.target.value)}
           />
 
-          <span className="unit">
-            {tip === "electricitate" ? "kWh" : "m³"}
-          </span>
+          {/* BUTTON */}
+          <button className="add-btn" onClick={add}>
+            Adaugă consum
+          </button>
         </div>
-
-        {/* DATĂ */}
-        <input
-          type="date"
-          value={data}
-          onChange={(e) => setData(e.target.value)}
-        />
-
-        <button className="add-btn" onClick={add}>
-          Adaugă
-        </button>
       </div>
     </div>
   );
