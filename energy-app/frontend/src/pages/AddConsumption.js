@@ -8,7 +8,6 @@ function AddConsumption() {
   const [msg, setMsg] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
-  // LIMITE CONSUM
   const LIMITA_ELECTRICITATE = 300;
   const LIMITA_GAZ = 150;
 
@@ -40,11 +39,12 @@ function AddConsumption() {
 
       setMsg("Consum adăugat cu succes!");
 
-      // POPUP LIMITĂ
+      // ALERTĂ LIMITĂ
       if (
         (tip === "electricitate" &&
           Number(valoare) > LIMITA_ELECTRICITATE) ||
-        (tip === "gaz" && Number(valoare) > LIMITA_GAZ)
+        (tip === "gaz" &&
+          Number(valoare) > LIMITA_GAZ)
       ) {
         setShowPopup(true);
 
@@ -62,26 +62,30 @@ function AddConsumption() {
 
   return (
     <div className="container">
-      {/* POPUP ALERTĂ */}
+
+      {/* POPUP */}
       {showPopup && (
         <div className="popup-warning">
-          ⚠️ Ai depășit limita recomandată de consum la{" "}
-          {tip === "electricitate" ? "electricitate" : "gaz"}!
+          ⚠️ Ai depășit limita recomandată pentru{" "}
+          {tip === "electricitate"
+            ? "electricitate"
+            : "gaz"}!
         </div>
       )}
 
-      <div className="consumption-card">
-        {/* LEFT SIDE */}
+      <div className="consumption-wrapper">
+
+        {/* LEFT */}
         <div className="left-panel">
           <h1>
             {tip === "electricitate"
-              ? "Consum Electricitate"
-              : "Consum Gaz"}
+              ? "Electricitate"
+              : "Gaz"}
           </h1>
 
           <p>
-            Monitorizează consumul și primește alerte când depășești
-            limitele recomandate.
+            Monitorizează consumul lunar și primește
+            notificări când depășești limita recomandată.
           </p>
 
           <div className="limit-box">
@@ -95,14 +99,16 @@ function AddConsumption() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT */}
         <div className="right-panel">
+
           {/* SWITCH */}
           <div className="switch-container">
+
             <button
               className={
                 tip === "electricitate"
-                  ? "switch-btn active-electric"
+                  ? "switch-btn active"
                   : "switch-btn"
               }
               onClick={() => setTip("electricitate")}
@@ -113,44 +119,53 @@ function AddConsumption() {
             <button
               className={
                 tip === "gaz"
-                  ? "switch-btn active-gaz"
+                  ? "switch-btn active"
                   : "switch-btn"
               }
               onClick={() => setTip("gaz")}
             >
               🔥 Gaz
             </button>
+
           </div>
 
-          {msg && <p className="message">{msg}</p>}
+          {msg && (
+            <div className="message">
+              {msg}
+            </div>
+          )}
 
-          {/* INPUT VALOARE */}
-          <div className="input-group">
+          {/* FORM */}
+          <div className="form-grid">
+
             <input
+              className="input-box"
               type="number"
               placeholder={`Consum în ${
-                tip === "electricitate" ? "kWh" : "m³"
+                tip === "electricitate"
+                  ? "kWh"
+                  : "m³"
               }`}
               value={valoare}
               onChange={(e) => setValoare(e.target.value)}
             />
 
-            <span className="unit">
-              {tip === "electricitate" ? "kWh" : "m³"}
-            </span>
+            <input
+              className="input-box"
+              type="date"
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+            />
+
           </div>
 
-          {/* DATĂ */}
-          <input
-            type="date"
-            value={data}
-            onChange={(e) => setData(e.target.value)}
-          />
-
-          {/* BUTTON */}
-          <button className="add-btn" onClick={add}>
+          <button
+            className="add-btn"
+            onClick={add}
+          >
             Adaugă consum
           </button>
+
         </div>
       </div>
     </div>
