@@ -2,6 +2,7 @@ import { useState } from "react";
 import { API_URL } from "../api";
 
 function AddConsumption() {
+
   const [valoare, setValoare] = useState("");
   const [tip, setTip] = useState("electricitate");
   const [data, setData] = useState("");
@@ -12,6 +13,7 @@ function AddConsumption() {
   const LIMITA_GAZ = 150;
 
   const add = async () => {
+
     setMsg("");
 
     if (!valoare || !data) {
@@ -20,6 +22,7 @@ function AddConsumption() {
     }
 
     try {
+
       const res = await fetch(
         `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&data=${data}`,
         {
@@ -39,13 +42,14 @@ function AddConsumption() {
 
       setMsg("Consum adăugat cu succes!");
 
-      // ALERTĂ LIMITĂ
       if (
         (tip === "electricitate" &&
-          Number(valoare) > LIMITA_ELECTRICITATE) ||
+          Number(valoare) > LIMITA_ELECTRICITATE)
+        ||
         (tip === "gaz" &&
           Number(valoare) > LIMITA_GAZ)
       ) {
+
         setShowPopup(true);
 
         setTimeout(() => {
@@ -55,28 +59,30 @@ function AddConsumption() {
 
       setValoare("");
       setData("");
+
     } catch {
+
       setMsg("Eroare server");
+
     }
   };
 
   return (
+
     <div className="container">
 
-      {/* POPUP */}
       {showPopup && (
         <div className="popup-warning">
-          ⚠️ Ai depășit limita recomandată pentru{" "}
-          {tip === "electricitate"
-            ? "electricitate"
-            : "gaz"}!
+          ⚠️ Ai depășit limita recomandată pentru {tip}!
         </div>
       )}
 
       <div className="consumption-wrapper">
 
         {/* LEFT */}
+
         <div className="left-panel">
+
           <h1>
             {tip === "electricitate"
               ? "Electricitate"
@@ -84,25 +90,29 @@ function AddConsumption() {
           </h1>
 
           <p>
-            Monitorizează consumul lunar și primește
-            notificări când depășești limita recomandată.
+            Monitorizează consumul lunar și primește notificări
+            când depășești limita recomandată.
           </p>
 
           <div className="limit-box">
+
             Limită recomandată:
+
             <strong>
               {" "}
               {tip === "electricitate"
                 ? `${LIMITA_ELECTRICITATE} kWh`
                 : `${LIMITA_GAZ} m³`}
             </strong>
+
           </div>
+
         </div>
 
         {/* RIGHT */}
+
         <div className="right-panel">
 
-          {/* SWITCH */}
           <div className="switch-container">
 
             <button
@@ -135,7 +145,6 @@ function AddConsumption() {
             </div>
           )}
 
-          {/* FORM */}
           <div className="form-grid">
 
             <input
@@ -167,7 +176,9 @@ function AddConsumption() {
           </button>
 
         </div>
+
       </div>
+
     </div>
   );
 }
