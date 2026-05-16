@@ -5,7 +5,11 @@ function AddConsumption() {
 
   const [valoare, setValoare] = useState("");
   const [tip, setTip] = useState("electricitate");
-  const [data, setData] = useState("");
+
+  // LUNA + AN
+  const [luna, setLuna] = useState("");
+  const [an, setAn] = useState(new Date().getFullYear());
+
   const [msg, setMsg] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
@@ -16,7 +20,8 @@ function AddConsumption() {
 
     setMsg("");
 
-    if (!valoare || !data) {
+    // VALIDARE
+    if (!valoare || !luna || !an) {
       setMsg("Completează toate câmpurile");
       return;
     }
@@ -24,7 +29,7 @@ function AddConsumption() {
     try {
 
       const res = await fetch(
-        `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&data=${data}`,
+        `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&luna=${luna}&an=${an}`,
         {
           method: "POST",
           headers: {
@@ -42,6 +47,7 @@ function AddConsumption() {
 
       setMsg("Consum adăugat cu succes!");
 
+      // ALERTĂ LIMITĂ
       if (
         (tip === "electricitate" &&
           Number(valoare) > LIMITA_ELECTRICITATE)
@@ -57,8 +63,9 @@ function AddConsumption() {
         }, 4000);
       }
 
+      // RESET
       setValoare("");
-      setData("");
+      setLuna("");
 
     } catch {
 
@@ -113,6 +120,8 @@ function AddConsumption() {
 
         <div className="right-panel">
 
+          {/* SWITCH */}
+
           <div className="switch-container">
 
             <button
@@ -139,13 +148,19 @@ function AddConsumption() {
 
           </div>
 
+          {/* MESSAGE */}
+
           {msg && (
             <div className="message">
               {msg}
             </div>
           )}
 
+          {/* FORM */}
+
           <div className="form-grid">
+
+            {/* CONSUM */}
 
             <input
               className="input-box"
@@ -159,14 +174,46 @@ function AddConsumption() {
               onChange={(e) => setValoare(e.target.value)}
             />
 
+            {/* LUNA */}
+
+            <select
+              className="input-box"
+              value={luna}
+              onChange={(e) => setLuna(e.target.value)}
+            >
+
+              <option value="">
+                Selectează luna
+              </option>
+
+              <option value="1">Ianuarie</option>
+              <option value="2">Februarie</option>
+              <option value="3">Martie</option>
+              <option value="4">Aprilie</option>
+              <option value="5">Mai</option>
+              <option value="6">Iunie</option>
+              <option value="7">Iulie</option>
+              <option value="8">August</option>
+              <option value="9">Septembrie</option>
+              <option value="10">Octombrie</option>
+              <option value="11">Noiembrie</option>
+              <option value="12">Decembrie</option>
+
+            </select>
+
+            {/* AN */}
+
             <input
               className="input-box"
-              type="date"
-              value={data}
-              onChange={(e) => setData(e.target.value)}
+              type="number"
+              placeholder="An"
+              value={an}
+              onChange={(e) => setAn(e.target.value)}
             />
 
           </div>
+
+          {/* BUTTON */}
 
           <button
             className="add-btn"
