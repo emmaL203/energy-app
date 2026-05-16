@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from datetime import datetime
 from .db import Base
 
 
@@ -11,12 +12,24 @@ class User(Base):
     password = Column(String)
 
 
-# ⚡🔥 CONSUMPTION (energie + gaz)
+# ⚡🔥 CONSUMPTION
 class Consumption(Base):
     __tablename__ = "consumptions"
 
     id = Column(Integer, primary_key=True, index=True)
+
     user_id = Column(Integer, ForeignKey("users.id"))
+
     valoare = Column(Float)
-    tip = Column(String)  # "electricitate" sau "gaz"
-    data = Column(Date)
+
+    tip = Column(String)
+
+    # LUNA + AN
+    luna = Column(Integer)
+
+    an = Column(Integer)
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )

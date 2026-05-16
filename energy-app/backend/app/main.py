@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from jose import JWTError, jwt
 
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
 from app.db import get_db, engine
 from app.models import Base, User, Consumption
@@ -210,12 +210,13 @@ def get_stats(
     }
 
 
-# ➕ ADD CONSUMPTION
+# # ➕ ADD CONSUMPTION
 @app.post("/add-consumption")
 def add_consumption(
     valoare: float,
     tip: str,
-    data: date,
+    luna: int,
+    an: int,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user)
 ):
@@ -230,18 +231,37 @@ def add_consumption(
             detail="User not found"
         )
 
+    # ✅ verifică duplicate
+    existing = db.query(Consumption).filter(
+        Consumption.user_id == user.id,
+        Consumption.tip == tip,
+        Consumption.luna == luna,
+        Consumption.an == an
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Există deja consum pentru această lună"
+        )
+
     consum = Consumption(
         user_id=user.id,
         valoare=valoare,
         tip=tip,
-        data=data
+        luna=luna,
+        an=an
     )
 
     db.add(consum)
+
     db.commit()
+
     db.refresh(consum)
 
-    return {"message": "Consum adaugat"}
+    return {
+        "message": "Consum adăugat cu succes"
+    }
 
 
 # 📊 GET CONSUMPTIONS
