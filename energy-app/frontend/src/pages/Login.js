@@ -12,27 +12,56 @@ function Login({ onLogin }) {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    setError("");
-    setLoading(true);
 
-    try {
-      const data = await loginUser(email, password);
+  setError("");
+  setLoading(true);
 
-      if (!data.access_token) {
-        setError("Email sau parola gresita");
-        setLoading(false);
-        return;
+  try {
+
+    const res = await fetch(
+      "https://energy-app-8yvb.onrender.com/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          username: email,
+          password: password,
+        }),
       }
+    );
 
-      localStorage.setItem("token", data.access_token);
-      onLogin();
-      navigate("/");
-    } catch {
-      setError("Serverul nu raspunde");
+    const data = await res.json();
+
+    console.log(data);
+
+    if (!data.access_token) {
+      setError(data.detail || "Login failed");
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
-  };
+    localStorage.setItem(
+      "token",
+      data.access_token
+    );
+
+    onLogin();
+
+    navigate("/");
+
+  } catch (err) {
+
+    console.log(err);
+
+    setError("Serverul nu raspunde");
+
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="container">
