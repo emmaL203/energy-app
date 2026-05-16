@@ -25,12 +25,20 @@ except Exception as e:
 
 app = FastAPI()
 
-# ✅ CORS
+# # ✅ CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+
+    allow_origins=[
+        "http://localhost:3000",
+        "https://energy-tracker-git-main-emmal203s-projects.vercel.app",
+        "https://energy-tracker-app.vercel.app",
+    ],
+
     allow_credentials=True,
+
     allow_methods=["*"],
+
     allow_headers=["*"],
 )
 
