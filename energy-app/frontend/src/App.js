@@ -7,22 +7,48 @@ import AddConsumption from "./pages/AddConsumption";
 import Stats from "./pages/Stats";
 
 function App() {
+
+  const handleLogin = () => {
+    window.location.href = "/dashboard";
+  };
+
   return (
+
     <BrowserRouter>
+
       <Routes>
 
-        <Route path="/" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <Login onLogin={handleLogin} />
+          }
+        />
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
 
-        <Route path="/add" element={<AddConsumption />} />
+        <Route
+          path="/add"
+          element={<AddConsumption />}
+        />
 
-        <Route path="/stats" element={<Stats />} />
+        <Route
+          path="/stats"
+          element={<Stats />}
+        />
 
       </Routes>
+
     </BrowserRouter>
+
   );
 }
 
