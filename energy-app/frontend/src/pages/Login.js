@@ -50,7 +50,7 @@ function Login({ onLogin }) {
 
     onLogin();
 
-    navigate("/");
+   navigate("/dashboard");
 
   } catch (err) {
 
