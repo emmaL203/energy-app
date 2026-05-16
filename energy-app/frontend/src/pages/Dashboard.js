@@ -1,47 +1,102 @@
-import React, { useEffect, useState } from "react";
-import { getConsumptions } from "../api";
+import { useNavigate } from "react-router-dom";
 
-export default function Dashboard() {
-  const [data, setData] = useState([]);
+function Dashboard() {
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await getConsumptions(token);
+  const navigate = useNavigate();
 
-        console.log("API response:", res);
+  const logout = () => {
 
-        // FOARTE IMPORTANT
-        if (Array.isArray(res)) {
-          setData(res);
-        } else if (res.data && Array.isArray(res.data)) {
-          setData(res.data);
-        } else {
-          setData([]);
-        }
-      } catch (err) {
-        console.error(err);
-        setData([]);
-      }
-    };
+    localStorage.removeItem("token");
 
-    loadData();
-  }, []);
+    navigate("/login");
+  };
 
   return (
-    <div>
-      <h2>Dashboard</h2>
 
-      {data.length === 0 ? (
-        <p>Nu ai date</p>
-      ) : (
-        data.map((item, index) => (
-          <div key={index}>
-            {item.tip} - {item.valoare}
+    <div className="container">
+
+      <div className="consumption-card">
+
+        {/* LEFT */}
+
+        <div className="left-side">
+
+          <h1>Energy Tracker</h1>
+
+          <p>
+            Monitorizează consumul de electricitate
+            și gaz într-un mod modern și intuitiv.
+          </p>
+
+          <div className="limit-box">
+
+            Controlează mai eficient
+            consumul lunar și urmărește
+            statisticile în timp real.
+
           </div>
-        ))
-      )}
+
+        </div>
+
+        {/* RIGHT */}
+
+        <div className="right-side">
+
+          <h2
+            style={{
+              fontSize: "42px",
+              marginBottom: "20px",
+            }}
+          >
+            Dashboard
+          </h2>
+
+          <p
+            style={{
+              marginBottom: "40px",
+              color: "#b8b8d1",
+              fontSize: "18px",
+            }}
+          >
+            Alege ce dorești să faci.
+          </p>
+
+          <div
+            style={{
+              display: "grid",
+              gap: "25px",
+            }}
+          >
+
+            <button
+              className="submit-btn"
+              onClick={() => navigate("/add")}
+            >
+              ➕ Adaugă consum
+            </button>
+
+            <button
+              className="submit-btn"
+              onClick={() => navigate("/stats")}
+            >
+              📊 Vezi statistici
+            </button>
+
+            <button
+              className="submit-btn"
+              onClick={logout}
+            >
+              🚪 Logout
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }
+
+export default Dashboard;
