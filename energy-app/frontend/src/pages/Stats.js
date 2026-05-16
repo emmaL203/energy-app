@@ -1,68 +1,62 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { API_URL } from "../api";
 
-function AddConsumption() {
+function Stats() {
 
-  const [valoare, setValoare] = useState("");
-  const [tip, setTip] = useState("electricitate");
-  const [data, setData] = useState("");
-  const [msg, setMsg] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [consumptions, setConsumptions] = useState([]);
 
-  const LIMITA_ELECTRICITATE = 300;
-  const LIMITA_GAZ = 150;
+  useEffect(() => {
 
-  const add = async () => {
+    loadStats();
+    loadConsumptions();
 
-    setMsg("");
+  }, []);
 
-    if (!valoare || !data) {
-      setMsg("Completează toate câmpurile");
-      return;
-    }
+  const loadStats = async () => {
 
     try {
 
       const res = await fetch(
-        `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&data=${data}`,
+        `${API_URL}/stats`,
         {
-          method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
 
-      const dataRes = await res.json();
+      const data = await res.json();
 
-      if (dataRes.detail) {
-        setMsg(dataRes.detail);
-        return;
-      }
+      setStats(data);
 
-      setMsg("Consum adăugat cu succes!");
+    } catch (err) {
 
-      if (
-        (tip === "electricitate" &&
-          Number(valoare) > LIMITA_ELECTRICITATE)
-        ||
-        (tip === "gaz" &&
-          Number(valoare) > LIMITA_GAZ)
-      ) {
+      console.log(err);
 
-        setShowPopup(true);
+    }
+  };
 
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 4000);
-      }
+  const loadConsumptions = async () => {
 
-      setValoare("");
-      setData("");
+    try {
 
-    } catch {
+      const res = await fetch(
+        `${API_URL}/consumptions`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-      setMsg("Eroare server");
+      const data = await res.json();
+
+      setConsumptions(data);
+
+    } catch (err) {
+
+      console.log(err);
 
     }
   };
@@ -71,106 +65,86 @@ function AddConsumption() {
 
     <div className="container">
 
-      {showPopup && (
-        <div className="popup-warning">
-          ⚠️ Ai depășit limita recomandată pentru {tip}!
-        </div>
-      )}
-
       <div className="consumption-card">
-
-        {/* LEFT PANEL */}
 
         <div className="left-side">
 
-          <h1>
-            {tip === "electricitate"
-              ? "Electricitate"
-              : "Gaz"}
-          </h1>
+          <h1>Statistici consum</h1>
 
           <p>
-            Monitorizează consumul și primește notificări
-            când depășești limita recomandată.
+            Vezi evoluția consumului tău lunar.
           </p>
 
-          <div className="limit-box">
-            Limită recomandată:
-            <strong>
-              {" "}
-              {tip === "electricitate"
-                ? `${LIMITA_ELECTRICITATE} kWh`
-                : `${LIMITA_GAZ} m³`}
-            </strong>
-          </div>
+          {stats && (
+            <div>
 
-        </div>
+              <div className="limit-box">
+                Total consum:
+                <strong>
+                  {" "}
+                  {stats.total_consum}
+                </strong>
+              </div>
 
-        {/* RIGHT PANEL */}
+              <div className="limit-box">
+                Electricitate:
+                <strong>
+                  {" "}
+                  {stats.electricitate}
+                </strong>
+              </div>
 
-        <div className="right-side">
+              <div className="limit-box">
+                Gaz:
+                <strong>
+                  {" "}
+                  {stats.gaz}
+                </strong>
+              </div>
 
-          <div className="switch-wrapper">
-
-            <button
-              className={
-                tip === "electricitate"
-                  ? "switch active"
-                  : "switch"
-              }
-              onClick={() => setTip("electricitate")}
-            >
-              ⚡ Electricitate
-            </button>
-
-            <button
-              className={
-                tip === "gaz"
-                  ? "switch active"
-                  : "switch"
-              }
-              onClick={() => setTip("gaz")}
-            >
-              🔥 Gaz
-            </button>
-
-          </div>
-
-          {msg && (
-            <div className="message">
-              {msg}
             </div>
           )}
 
-          <div className="form-area">
+        </div>
 
-            <input
-              className="input-modern"
-              type="number"
-              placeholder={`Consum în ${
-                tip === "electricitate"
-                  ? "kWh"
-                  : "m³"
-              }`}
-              value={valoare}
-              onChange={(e) => setValoare(e.target.value)}
-            />
+        <div className="right-side">
 
-            <input
-              className="input-modern"
-              type="date"
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-            />
+          <h2>
+            Consumuri adăugate
+          </h2>
 
-          </div>
+          {consumptions.length === 0 ? (
 
-          <button
-            className="submit-btn"
-            onClick={add}
-          >
-            Adaugă consum
-          </button>
+            <p>
+              Nu există consumuri.
+            </p>
+
+          ) : (
+
+            consumptions.map((c) => (
+
+              <div
+                key={c.id}
+                className="consumption-item"
+              >
+
+                <strong>
+                  {c.tip}
+                </strong>
+
+                <p>
+                  {c.valoare}
+                </p>
+
+                <p>
+                  {c.data}
+                </p>
+
+              </div>
+
+            ))
+
+          )}
 
         </div>
 
@@ -180,4 +154,4 @@ function AddConsumption() {
   );
 }
 
-export default AddConsumption;
+export default Stats;
