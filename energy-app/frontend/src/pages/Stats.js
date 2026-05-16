@@ -1,216 +1,111 @@
 import { useEffect, useState } from "react";
-import { API_URL } from "../api";
+import { getConsumptions } from "../api";
 
 function Stats() {
 
-  const [stats, setStats] = useState(null);
-
   const [consumptions, setConsumptions] = useState([]);
-
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
 
-    loadData();
+    const fetchData = async () => {
+
+      try {
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setError("Nu esti logat");
+          return;
+        }
+
+        const data = await getConsumptions(token);
+
+        if (!Array.isArray(data)) {
+          setError(data.detail || "Eroare");
+          return;
+        }
+
+        setConsumptions(data);
+
+      } catch {
+
+        setError("Server error");
+
+      }
+    };
+
+    fetchData();
 
   }, []);
 
-  const loadData = async () => {
+  const totalElectricitate = consumptions
+    .filter(c => c.tip === "electricitate")
+    .reduce((acc, c) => acc + c.valoare, 0);
 
-    try {
-
-      const token = localStorage.getItem("token");
-
-      // dacă nu există token
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      // STATS
-      const statsRes = await fetch(
-        `${API_URL}/stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const statsData = await statsRes.json();
-
-      // dacă token invalid
-      if (statsData.detail) {
-
-        localStorage.clear();
-
-        window.location.href = "/";
-
-        return;
-      }
-
-      setStats(statsData);
-
-      // CONSUMPTIONS
-      const consumRes = await fetch(
-        `${API_URL}/consumptions`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const consumData = await consumRes.json();
-
-      // protecție .map()
-      if (Array.isArray(consumData)) {
-        setConsumptions(consumData);
-      } else {
-        setConsumptions([]);
-      }
-
-    } catch (err) {
-
-      console.log(err);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="container">
-        <h2>Loading...</h2>
-      </div>
-    );
-  }
+  const totalGaz = consumptions
+    .filter(c => c.tip === "gaz")
+    .reduce((acc, c) => acc + c.valoare, 0);
 
   return (
 
     <div className="container">
 
-      <div className="consumption-card">
+      <div className="card">
 
-        {/* LEFT */}
+        <h1>Statistici consum</h1>
 
-        <div className="left-side">
-
-          <h1>Statistici</h1>
-
-          <p>
-            Vezi consumul total și istoricul
-            consumurilor adăugate.
+        {error && (
+          <p style={{ color: "red" }}>
+            {error}
           </p>
+        )}
 
-          {stats && (
+        <div className="stats-box">
 
-            <div>
+          <h3>Total electricitate</h3>
+          <p>{totalElectricitate} kWh</p>
 
-              <div className="limit-box">
-                Total consum:
-                <strong>
-                  {" "}
-                  {stats.total_consum}
-                </strong>
-              </div>
+        </div>
 
-              <div className="limit-box">
-                Electricitate:
-                <strong>
-                  {" "}
-                  {stats.electricitate}
-                </strong>
-              </div>
+        <div className="stats-box">
 
-              <div className="limit-box">
-                Gaz:
-                <strong>
-                  {" "}
-                  {stats.gaz}
-                </strong>
-              </div>
+          <h3>Total gaz</h3>
+          <p>{totalGaz} m³</p>
+
+        </div>
+
+        <h2>Consumuri adăugate</h2>
+
+        {consumptions.length === 0 ? (
+
+          <p>Nu există consumuri.</p>
+
+        ) : (
+
+          consumptions.map((c) => (
+
+            <div
+              key={c.id}
+              className="consumption-item"
+            >
+
+              <p>
+                <strong>Tip:</strong> {c.tip}
+              </p>
+
+              <p>
+                <strong>Consum:</strong> {c.valoare}
+              </p>
+
+              <p>
+                <strong>Data:</strong> {c.data}
+              </p>
 
             </div>
 
-          )}
-
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="right-side">
-
-          <h2>
-            Consumuri adăugate
-          </h2>
-
-          {consumptions.length === 0 ? (
-
-            <p>
-              Nu există consumuri.
-            </p>
-
-          ) : (
-
-            consumptions.map((c) => (
-
-              <div
-                key={c.id}
-                className="consumption-item"
-                style={{
-                  marginBottom: "20px",
-                  padding: "20px",
-                  borderRadius: "18px",
-                  background: "#151933",
-                  border: "1px solid #2c315e"
-                }}
-              >
-
-                <h3>
-                  {c.tip === "electricitate"
-                    ? "⚡ Electricitate"
-                    : "🔥 Gaz"}
-                </h3>
-
-                <p>
-                  Consum:
-                  <strong>
-                    {" "}
-                    {c.valoare}
-                  </strong>
-                </p>
-
-                {c.luna && (
-                  <p>
-                    Luna:
-                    <strong>
-                      {" "}
-                      {c.luna}/{c.an}
-                    </strong>
-                  </p>
-                )}
-
-                {c.data && (
-                  <p>
-                    Data:
-                    <strong>
-                      {" "}
-                      {c.data}
-                    </strong>
-                  </p>
-                )}
-
-              </div>
-
-            ))
-
-          )}
-
-        </div>
+          ))
+        )}
 
       </div>
 
