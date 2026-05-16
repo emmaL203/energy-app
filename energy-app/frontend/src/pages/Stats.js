@@ -4,62 +4,90 @@ import { API_URL } from "../api";
 function Stats() {
 
   const [stats, setStats] = useState(null);
+
   const [consumptions, setConsumptions] = useState([]);
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
 
-    loadStats();
-    loadConsumptions();
+    loadData();
 
   }, []);
 
-  const loadStats = async () => {
+  const loadData = async () => {
 
     try {
 
-      const res = await fetch(
+      const token = localStorage.getItem("token");
+
+      // dacă nu există token
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      // STATS
+      const statsRes = await fetch(
         `${API_URL}/stats`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      const data = await res.json();
+      const statsData = await statsRes.json();
 
-      setStats(data);
+      // dacă token invalid
+      if (statsData.detail) {
 
-    } catch (err) {
+        localStorage.clear();
 
-      console.log(err);
+        window.location.href = "/";
 
-    }
-  };
+        return;
+      }
 
-  const loadConsumptions = async () => {
+      setStats(statsData);
 
-    try {
-
-      const res = await fetch(
+      // CONSUMPTIONS
+      const consumRes = await fetch(
         `${API_URL}/consumptions`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      const data = await res.json();
+      const consumData = await consumRes.json();
 
-      setConsumptions(data);
+      // protecție .map()
+      if (Array.isArray(consumData)) {
+        setConsumptions(consumData);
+      } else {
+        setConsumptions([]);
+      }
 
     } catch (err) {
 
       console.log(err);
 
+    } finally {
+
+      setLoading(false);
+
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
 
   return (
 
@@ -67,15 +95,19 @@ function Stats() {
 
       <div className="consumption-card">
 
+        {/* LEFT */}
+
         <div className="left-side">
 
-          <h1>Statistici consum</h1>
+          <h1>Statistici</h1>
 
           <p>
-            Vezi evoluția consumului tău lunar.
+            Vezi consumul total și istoricul
+            consumurilor adăugate.
           </p>
 
           {stats && (
+
             <div>
 
               <div className="limit-box">
@@ -103,9 +135,12 @@ function Stats() {
               </div>
 
             </div>
+
           )}
 
         </div>
+
+        {/* RIGHT */}
 
         <div className="right-side">
 
@@ -126,19 +161,48 @@ function Stats() {
               <div
                 key={c.id}
                 className="consumption-item"
+                style={{
+                  marginBottom: "20px",
+                  padding: "20px",
+                  borderRadius: "18px",
+                  background: "#151933",
+                  border: "1px solid #2c315e"
+                }}
               >
 
-                <strong>
-                  {c.tip}
-                </strong>
+                <h3>
+                  {c.tip === "electricitate"
+                    ? "⚡ Electricitate"
+                    : "🔥 Gaz"}
+                </h3>
 
                 <p>
-                  {c.valoare}
+                  Consum:
+                  <strong>
+                    {" "}
+                    {c.valoare}
+                  </strong>
                 </p>
 
-                <p>
-                  {c.data}
-                </p>
+                {c.luna && (
+                  <p>
+                    Luna:
+                    <strong>
+                      {" "}
+                      {c.luna}/{c.an}
+                    </strong>
+                  </p>
+                )}
+
+                {c.data && (
+                  <p>
+                    Data:
+                    <strong>
+                      {" "}
+                      {c.data}
+                    </strong>
+                  </p>
+                )}
 
               </div>
 
