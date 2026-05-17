@@ -10,7 +10,6 @@ function AddConsumption() {
   const [an, setAn] = useState("");
 
   const [msg, setMsg] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
 
   const LIMITA_ELECTRICITATE = 300;
   const LIMITA_GAZ = 150;
@@ -52,32 +51,34 @@ function AddConsumption() {
       setMsg("Consum adăugat cu succes!");
 
       if (
-        (
-          tip === "electricitate" &&
-          Number(valoare) > LIMITA_ELECTRICITATE
-        )
-        ||
-        (
-          tip === "gaz" &&
-          Number(valoare) > LIMITA_GAZ
-        )
+        tip === "electricitate" &&
+        Number(valoare) > LIMITA_ELECTRICITATE
       ) {
 
-        setShowPopup(true);
+        alert(
+          "Ai depășit limita recomandată la electricitate!"
+        );
+      }
 
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 4000);
+      if (
+        tip === "gaz" &&
+        Number(valoare) > LIMITA_GAZ
+      ) {
+
+        alert(
+          "Ai depășit limita recomandată la gaz!"
+        );
       }
 
       setValoare("");
       setLuna("");
       setAn("");
 
-    } catch {
+    } catch (err) {
+
+      console.log(err);
 
       setMsg("Eroare server");
-
     }
   };
 
@@ -85,164 +86,132 @@ function AddConsumption() {
 
     <div className="container">
 
-      {showPopup && (
+      <div className="card">
 
-        <div className="popup-warning">
+        <h1>
 
-          ⚠️ Ai depășit limita recomandată pentru {tip}!
+          {tip === "electricitate"
+            ? "Electricitate"
+            : "Gaz"}
 
-        </div>
+        </h1>
 
-      )}
+        <p>
 
-      <div className="consumption-card">
+          Monitorizează consumul lunar și primește
+          notificări când depășești limita recomandată.
 
-        {/* LEFT */}
+        </p>
 
-        <div className="left-side">
+        <p>
 
-          <h1>
+          Limită recomandată:
+
+          <strong>
+
+            {" "}
 
             {tip === "electricitate"
-              ? "Electricitate"
-              : "Gaz"}
+              ? `${LIMITA_ELECTRICITATE} kWh`
+              : `${LIMITA_GAZ} m³`}
 
-          </h1>
+          </strong>
 
-          <p>
+        </p>
 
-            Monitorizează consumul lunar și primește
-            notificări când depășești limita recomandată.
-
-          </p>
-
-          <div className="limit-box">
-
-            Limită recomandată:
-
-            <strong>
-
-              {" "}
-
-              {tip === "electricitate"
-                ? `${LIMITA_ELECTRICITATE} kWh`
-                : `${LIMITA_GAZ} m³`}
-
-            </strong>
-
-          </div>
-
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="right-side">
-
-          <div className="switch-wrapper">
-
-            <button
-              className={
-                tip === "electricitate"
-                  ? "switch active"
-                  : "switch"
-              }
-              onClick={() =>
-                setTip("electricitate")
-              }
-            >
-              ⚡ Electricitate
-            </button>
-
-            <button
-              className={
-                tip === "gaz"
-                  ? "switch active"
-                  : "switch"
-              }
-              onClick={() =>
-                setTip("gaz")
-              }
-            >
-              🔥 Gaz
-            </button>
-
-          </div>
-
-          {msg && (
-
-            <div className="message">
-
-              {msg}
-
-            </div>
-
-          )}
-
-          <div className="form-area">
-
-            <input
-              className="input-modern"
-              type="number"
-              placeholder={`Consum în ${
-                tip === "electricitate"
-                  ? "kWh"
-                  : "m³"
-              }`}
-              value={valoare}
-              onChange={(e) =>
-                setValoare(e.target.value)
-              }
-            />
-
-            <select
-              className="input-modern"
-              value={luna}
-              onChange={(e) =>
-                setLuna(e.target.value)
-              }
-            >
-
-              <option value="">
-                Selectează luna
-              </option>
-
-              <option value="01">Ianuarie</option>
-              <option value="02">Februarie</option>
-              <option value="03">Martie</option>
-              <option value="04">Aprilie</option>
-              <option value="05">Mai</option>
-              <option value="06">Iunie</option>
-              <option value="07">Iulie</option>
-              <option value="08">August</option>
-              <option value="09">Septembrie</option>
-              <option value="10">Octombrie</option>
-              <option value="11">Noiembrie</option>
-              <option value="12">Decembrie</option>
-
-            </select>
-
-            <input
-              className="input-modern"
-              type="number"
-              placeholder="2026"
-              value={an}
-              onChange={(e) =>
-                setAn(e.target.value)
-              }
-            />
-
-          </div>
+        <div className="switch-wrapper">
 
           <button
-            className="submit-btn"
-            onClick={add}
+            className={
+              tip === "electricitate"
+                ? "switch active"
+                : "switch"
+            }
+            onClick={() =>
+              setTip("electricitate")
+            }
           >
+            ⚡ Electricitate
+          </button>
 
-            Adaugă consum
-
+          <button
+            className={
+              tip === "gaz"
+                ? "switch active"
+                : "switch"
+            }
+            onClick={() =>
+              setTip("gaz")
+            }
+          >
+            🔥 Gaz
           </button>
 
         </div>
+
+        {msg && (
+          <p className="message">
+            {msg}
+          </p>
+        )}
+
+        <div className="form-area">
+
+          <input
+            className="input-modern"
+            type="number"
+            placeholder="Consum"
+            value={valoare}
+            onChange={(e) =>
+              setValoare(e.target.value)
+            }
+          />
+
+          <select
+            className="input-modern"
+            value={luna}
+            onChange={(e) =>
+              setLuna(e.target.value)
+            }
+          >
+
+            <option value="">
+              Selectează luna
+            </option>
+
+            <option value="01">Ianuarie</option>
+            <option value="02">Februarie</option>
+            <option value="03">Martie</option>
+            <option value="04">Aprilie</option>
+            <option value="05">Mai</option>
+            <option value="06">Iunie</option>
+            <option value="07">Iulie</option>
+            <option value="08">August</option>
+            <option value="09">Septembrie</option>
+            <option value="10">Octombrie</option>
+            <option value="11">Noiembrie</option>
+            <option value="12">Decembrie</option>
+
+          </select>
+
+          <input
+            className="input-modern"
+            type="number"
+            placeholder="2026"
+            value={an}
+            onChange={(e) =>
+              setAn(e.target.value)
+            }
+          />
+
+        </div>
+
+        <button
+          className="submit-btn"
+          onClick={add}
+        >
+          Adaugă consum
+        </button>
 
       </div>
 
