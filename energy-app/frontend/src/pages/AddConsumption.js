@@ -6,9 +6,8 @@ function AddConsumption() {
   const [valoare, setValoare] = useState("");
   const [tip, setTip] = useState("electricitate");
 
-  // LUNA + AN
   const [luna, setLuna] = useState("");
-  const [an, setAn] = useState(new Date().getFullYear());
+  const [an, setAn] = useState("");
 
   const [msg, setMsg] = useState("");
   const [showPopup, setShowPopup] = useState(false);
@@ -20,20 +19,24 @@ function AddConsumption() {
 
     setMsg("");
 
-    // VALIDARE
     if (!valoare || !luna || !an) {
+
       setMsg("Completează toate câmpurile");
       return;
     }
 
     try {
 
+      const dataCompleta =
+        `${an}-${luna}-01`;
+
       const res = await fetch(
-        `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&luna=${luna}&an=${an}`,
+        `${API_URL}/add-consumption?valoare=${valoare}&tip=${tip}&data=${dataCompleta}`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization:
+              `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -41,19 +44,23 @@ function AddConsumption() {
       const dataRes = await res.json();
 
       if (dataRes.detail) {
+
         setMsg(dataRes.detail);
         return;
       }
 
       setMsg("Consum adăugat cu succes!");
 
-      // ALERTĂ LIMITĂ
       if (
-        (tip === "electricitate" &&
-          Number(valoare) > LIMITA_ELECTRICITATE)
+        (
+          tip === "electricitate" &&
+          Number(valoare) > LIMITA_ELECTRICITATE
+        )
         ||
-        (tip === "gaz" &&
-          Number(valoare) > LIMITA_GAZ)
+        (
+          tip === "gaz" &&
+          Number(valoare) > LIMITA_GAZ
+        )
       ) {
 
         setShowPopup(true);
@@ -63,9 +70,9 @@ function AddConsumption() {
         }, 4000);
       }
 
-      // RESET
       setValoare("");
       setLuna("");
+      setAn("");
 
     } catch {
 
@@ -79,26 +86,34 @@ function AddConsumption() {
     <div className="container">
 
       {showPopup && (
+
         <div className="popup-warning">
+
           ⚠️ Ai depășit limita recomandată pentru {tip}!
+
         </div>
+
       )}
 
-      <div className="consumption-wrapper">
+      <div className="consumption-card">
 
         {/* LEFT */}
 
-        <div className="left-panel">
+        <div className="left-side">
 
           <h1>
+
             {tip === "electricitate"
               ? "Electricitate"
               : "Gaz"}
+
           </h1>
 
           <p>
-            Monitorizează consumul lunar și primește notificări
-            când depășești limita recomandată.
+
+            Monitorizează consumul lunar și primește
+            notificări când depășești limita recomandată.
+
           </p>
 
           <div className="limit-box">
@@ -106,10 +121,13 @@ function AddConsumption() {
             Limită recomandată:
 
             <strong>
+
               {" "}
+
               {tip === "electricitate"
                 ? `${LIMITA_ELECTRICITATE} kWh`
                 : `${LIMITA_GAZ} m³`}
+
             </strong>
 
           </div>
@@ -118,19 +136,19 @@ function AddConsumption() {
 
         {/* RIGHT */}
 
-        <div className="right-panel">
+        <div className="right-side">
 
-          {/* SWITCH */}
-
-          <div className="switch-container">
+          <div className="switch-wrapper">
 
             <button
               className={
                 tip === "electricitate"
-                  ? "switch-btn active"
-                  : "switch-btn"
+                  ? "switch active"
+                  : "switch"
               }
-              onClick={() => setTip("electricitate")}
+              onClick={() =>
+                setTip("electricitate")
+              }
             >
               ⚡ Electricitate
             </button>
@@ -138,32 +156,32 @@ function AddConsumption() {
             <button
               className={
                 tip === "gaz"
-                  ? "switch-btn active"
-                  : "switch-btn"
+                  ? "switch active"
+                  : "switch"
               }
-              onClick={() => setTip("gaz")}
+              onClick={() =>
+                setTip("gaz")
+              }
             >
               🔥 Gaz
             </button>
 
           </div>
 
-          {/* MESSAGE */}
-
           {msg && (
+
             <div className="message">
+
               {msg}
+
             </div>
+
           )}
 
-          {/* FORM */}
-
-          <div className="form-grid">
-
-            {/* CONSUM */}
+          <div className="form-area">
 
             <input
-              className="input-box"
+              className="input-modern"
               type="number"
               placeholder={`Consum în ${
                 tip === "electricitate"
@@ -171,55 +189,57 @@ function AddConsumption() {
                   : "m³"
               }`}
               value={valoare}
-              onChange={(e) => setValoare(e.target.value)}
+              onChange={(e) =>
+                setValoare(e.target.value)
+              }
             />
 
-            {/* LUNA */}
-
             <select
-              className="input-box"
+              className="input-modern"
               value={luna}
-              onChange={(e) => setLuna(e.target.value)}
+              onChange={(e) =>
+                setLuna(e.target.value)
+              }
             >
 
               <option value="">
                 Selectează luna
               </option>
 
-              <option value="1">Ianuarie</option>
-              <option value="2">Februarie</option>
-              <option value="3">Martie</option>
-              <option value="4">Aprilie</option>
-              <option value="5">Mai</option>
-              <option value="6">Iunie</option>
-              <option value="7">Iulie</option>
-              <option value="8">August</option>
-              <option value="9">Septembrie</option>
+              <option value="01">Ianuarie</option>
+              <option value="02">Februarie</option>
+              <option value="03">Martie</option>
+              <option value="04">Aprilie</option>
+              <option value="05">Mai</option>
+              <option value="06">Iunie</option>
+              <option value="07">Iulie</option>
+              <option value="08">August</option>
+              <option value="09">Septembrie</option>
               <option value="10">Octombrie</option>
               <option value="11">Noiembrie</option>
               <option value="12">Decembrie</option>
 
             </select>
 
-            {/* AN */}
-
             <input
-              className="input-box"
+              className="input-modern"
               type="number"
-              placeholder="An"
+              placeholder="2026"
               value={an}
-              onChange={(e) => setAn(e.target.value)}
+              onChange={(e) =>
+                setAn(e.target.value)
+              }
             />
 
           </div>
 
-          {/* BUTTON */}
-
           <button
-            className="add-btn"
+            className="submit-btn"
             onClick={add}
           >
+
             Adaugă consum
+
           </button>
 
         </div>
